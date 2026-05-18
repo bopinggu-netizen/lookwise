@@ -38,12 +38,12 @@ export function ScoreDisplay({ result }: ScoreDisplayProps) {
 
           <div className="flex-1 text-center sm:text-left">
             <p className="label-mono text-[var(--accent)]">Analysis Complete</p>
-            <h2 className="mt-1 text-xl font-semibold sm:text-2xl">颜值参考报告</h2>
+            <h2 className="mt-1 text-xl font-semibold sm:text-2xl">亚洲常见审美参考报告</h2>
             <p className="mt-3 text-sm leading-relaxed text-[var(--muted)] sm:text-base">
               {result.summary}
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-2 sm:justify-start">
-              {["普通人自拍", "真实素颜", "4.0–7.0 区间"].map((tag) => (
+              {["普通人真实自拍", "娱乐参考", "4.0–7.0 区间"].map((tag) => (
                 <span
                   key={tag}
                   className="rounded-full border border-[var(--border)] bg-[var(--surface-solid)]/80 px-3 py-1 text-xs text-[var(--muted)]"
@@ -58,7 +58,7 @@ export function ScoreDisplay({ result }: ScoreDisplayProps) {
 
       <div>
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-base font-semibold sm:text-lg">多维特征分析</h3>
+          <h3 className="text-base font-semibold sm:text-lg">核心维度分析</h3>
           <span className="label-mono text-[var(--muted)]">Feature Vector</span>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -92,7 +92,7 @@ export function ScoreDisplay({ result }: ScoreDisplayProps) {
             <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--accent)]/15 text-xs text-[var(--accent)]">
               AI
             </span>
-            <h3 className="font-medium">智能优化建议</h3>
+            <h3 className="font-medium">拍摄参考建议</h3>
           </div>
           <ul className="space-y-2.5">
             {result.tips.map((tip, i) => (
@@ -111,19 +111,34 @@ export function ScoreDisplay({ result }: ScoreDisplayProps) {
         <h3 className="mb-3 font-medium">审美视角参考</h3>
         <div className="space-y-3 text-sm leading-relaxed text-[var(--muted)]">
           <p>
-            女性照片 + 男性审美：参考亚洲常见审美偏好中的倾向，干净感、眼部吸引力、脸部柔和度、白净感、纤细感、自然甜美感等通常更容易形成好感。
+            女性照片 + 男性审美：本次评分参考亚洲常见男性审美偏好中的部分倾向，干净感、眼部吸引力、脸部柔和度、白净感、轻盈感、年轻感和自然甜美感通常更容易形成第一眼好感，但不代表所有男性。
           </p>
           <p>
-            男性照片 + 女性审美：参考亚洲常见审美偏好中的倾向，清爽干净感、皮肤状态、下颌线、脸型轮廓、眉眼精神感、发型整洁度、自然阳光感等通常更容易形成好感。
+            男性照片 + 女性审美：本次评分参考亚洲常见女性审美偏好中的部分倾向，清爽干净感、皮肤状态、脸型轮廓、下颌线清晰度、眉眼精神感、发型整洁度和自然阳光感通常更容易形成第一眼好感，但不代表所有女性。
+          </p>
+          <p>
+            综合审美参考：本次评分综合参考协调度、皮肤与干净感、脸型轮廓、眉眼吸引力和自然上镜度，结果仅供娱乐参考。
+          </p>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-solid)]/45 p-5 sm:p-6">
+        <h3 className="mb-3 font-medium">参考依据说明</h3>
+        <div className="space-y-3 text-sm leading-relaxed text-[var(--muted)]">
+          <p>
+            LookWise 的评分模型参考了面部吸引力研究中常见的协调度、对称性、平均化、皮肤健康感、脸型轮廓、眼部吸引力和自然上镜度等维度。亚洲审美部分参考东亚/东南亚审美讨论中较常出现的清透皮肤、年轻感、眼部轮廓、脸型流畅度和整体干净感等偏好。
+          </p>
+          <p>
+            异性视角仅代表常见审美倾向，并不代表所有男性或女性的真实偏好。审美具有明显的主观性、文化差异和时代变化，本评分仅作为普通人真实自拍场景下的娱乐参考。
           </p>
         </div>
       </div>
 
       <p className="text-center text-xs leading-relaxed text-[var(--muted)]/60">
-        本评分仅针对普通人真实自拍场景，不与网红、精修图或专业摄影作品对比。
+        本评分仅针对普通人真实自拍场景，不与明星、网红、精修图或专业摄影作品比较。
       </p>
       <p className="mt-1 text-center text-xs text-[var(--muted)]/50">
-        7.0 是普通人区间的极高参考分。评分仅供娱乐与自我参考，不代表绝对结论。
+        本评分不代表个人价值，不构成医学、美容、择偶或职业建议。不同人、不同地区、不同文化背景下的审美差异很大，请理性看待。
       </p>
     </div>
   );

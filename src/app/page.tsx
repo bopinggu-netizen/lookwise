@@ -217,7 +217,7 @@ export default function HomePage() {
             所有分析在浏览器本地完成 · 照片不上传服务器
           </p>
           <p className="mt-1 text-xs text-[var(--muted)]/50">
-            基于图像启发式算法 · 评分仅供娱乐参考
+            基于图像启发式算法 · 审美具有主观性，评分仅供娱乐参考
           </p>
         </footer>
       </main>

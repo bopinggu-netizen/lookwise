@@ -52,32 +52,56 @@ export function computeBeautyScore(
 
   const dimensions = [
     {
-      name: "五官协调",
-      score: clamp(n.harmony + (random() - 0.5) * 0.08, 0.35, 0.88),
-      comment: n.symmetry > 0.75 ? "左右对称度较好，整体比例自然" : "五官比例尚可，轻微角度变化会影响当前照片观感",
+      name: "五官协调度",
+      score: clamp(n.harmony + (random() - 0.5) * 0.07, 0.35, 0.88),
+      comment:
+        n.symmetry > 0.75
+          ? "五官关系较自然，整体比例在当前自拍中呈现协调。"
+          : "当前照片角度会影响协调度判断，结果更适合作为轻量参考。",
     },
     {
-      name: "肤质气色",
-      score: clamp(n.complexion + (random() - 0.5) * 0.06, 0.35, 0.85),
-      comment: n.naturalSkin > 0.5 ? "肤色自然，气色较为干净通透" : "肤质纹理保留，真实感较好",
+      name: "脸型轮廓",
+      score: clamp(n.proportion * 0.72 + n.symmetry * 0.28 + (random() - 0.5) * 0.06, 0.38, 0.86),
+      comment: "参考亚洲常见审美偏好中的倾向，脸型流畅度与轮廓清爽感会影响第一眼观感。",
     },
     {
-      name: "轮廓线条",
-      score: clamp(n.proportion * 0.85 + n.symmetry * 0.15 + (random() - 0.5) * 0.07, 0.38, 0.86),
-      comment: "脸型线条自然，参考亚洲常见审美偏好中的清爽轮廓倾向",
+      name: "眉眼吸引力",
+      score: clamp(n.lighting * 0.38 + n.clarity * 0.34 + n.symmetry * 0.28 + (random() - 0.5) * 0.07, 0.38, 0.88),
+      comment:
+        n.clarity > 0.55
+          ? "眉眼区域清晰度较好，更容易呈现精神感和亲和感。"
+          : "眉眼细节受清晰度或光线影响，建议用更稳定的自然光自拍复测。",
     },
     {
-      name: "神采亲和力",
-      score: clamp(n.lighting * 0.6 + n.clarity * 0.4 + (random() - 0.5) * 0.08, 0.4, 0.88),
-      comment: n.lighting > 0.65 ? "光线衬托眉眼与表情，更有自然亲和感" : "建议适当提亮环境光以展现眉眼神采",
+      name: "皮肤与干净感",
+      score: clamp(n.complexion * 0.72 + n.lighting * 0.28 + (random() - 0.5) * 0.06, 0.35, 0.86),
+      comment:
+        n.naturalSkin > 0.5
+          ? "肤色与纹理呈现自然，整体干净感较稳定。"
+          : "皮肤纹理保留较真实，自拍光线会影响干净感判断。",
+    },
+    {
+      name: "异性审美匹配度",
+      score: clamp(n.harmony * 0.34 + n.complexion * 0.28 + n.lighting * 0.2 + n.proportion * 0.18 + (random() - 0.5) * 0.06, 0.36, 0.86),
+      comment: "仅参考亚洲常见审美偏好中的部分倾向，不代表所有男性或女性的真实偏好。",
+    },
+    {
+      name: "自然上镜度",
+      score: clamp(n.clarity * 0.38 + n.lighting * 0.34 + n.naturalSkin * 0.28 + (random() - 0.5) * 0.07, 0.4, 0.88),
+      comment:
+        n.lighting > 0.65
+          ? "当前照片的光线和真实感较好，自然上镜度有加分。"
+          : "自然上镜度受光线影响较明显，换到柔和自然光下可能更稳定。",
     },
   ];
 
   const weighted =
-    dimensions[0].score * 0.3 +
-    dimensions[1].score * 0.25 +
-    dimensions[2].score * 0.25 +
-    dimensions[3].score * 0.2;
+    dimensions[0].score * 0.2 +
+    dimensions[1].score * 0.16 +
+    dimensions[2].score * 0.18 +
+    dimensions[3].score * 0.18 +
+    dimensions[4].score * 0.14 +
+    dimensions[5].score * 0.14;
 
   // 将多数结果压在 4.5–6.2，6.5+ 较少，7.0 极少
   let normalizedScore = clamp(weighted * 0.68 + 0.06, 0, 1);
@@ -114,24 +138,24 @@ export function computeBeautyScore(
 
 function buildSummary(score: number, tier: string): string {
   if (score >= 7.0) {
-    return `综合参考结果为「${tier}」。在普通人真实自拍场景中属于极高参考区间，仍仅代表这张照片的自然观感。`;
+    return `综合参考结果为「${tier}」。7.0 已经是普通人真实自拍区间内的极高参考分，不代表与明星、网红或精修图对标。`;
   }
   if (score >= 6.5) {
-    return `综合参考结果为「${tier}」。整体观感突出，在日常生活场景中属于很有吸引力的类型。`;
+    return `综合参考结果为「${tier}」。整体观感突出，属于普通人真实自拍场景中较高的参考区间。`;
   }
   if (score >= 6.0) {
-    return `综合参考结果为「${tier}」。在常见生活场景中辨识度较高，若干维度表现亮眼。`;
+    return `综合参考结果为「${tier}」。协调度、干净感或自然上镜度中有若干维度表现较好。`;
   }
   if (score >= 5.5) {
-    return `综合参考结果为「${tier}」。第一眼好感度较好，真实素颜状态有加分。`;
+    return `综合参考结果为「${tier}」。第一眼好感度较好，真实自拍状态下有自然加分。`;
   }
   if (score >= 5.0) {
-    return `综合参考结果为「${tier}」。具备一定吸引力，符合日常审美中清秀、干净、耐看的倾向。`;
+    return `综合参考结果为「${tier}」。具备一定吸引力，符合日常审美中清爽、自然、耐看的倾向。`;
   }
   if (score >= 4.5) {
-    return `综合参考结果为「${tier}」。整体处于普通人常见区间，真实自然的状态本身就是加分项。`;
+    return `综合参考结果为「${tier}」。整体处于普通人常见自拍区间，真实自然的状态本身就是加分项。`;
   }
-  return `综合参考结果为「${tier}」。建议优化拍摄角度与光线后再次评估，评分基于当前照片条件。`;
+  return `综合参考结果为「${tier}」。评分主要受当前照片条件影响，可在更柔和的光线下再次参考。`;
 }
 
 function buildTips(
@@ -143,7 +167,7 @@ function buildTips(
 
   if (n.lighting < 0.6) tips.push("在自然光窗边拍摄，避免顶光与背光。");
   if (n.clarity < 0.5) tips.push("保持手机稳定，确保对焦清晰。");
-  if (n.symmetry < 0.7) tips.push("正对镜头，眼睛平视，减少侧脸角度。");
+  if (n.symmetry < 0.7) tips.push("轻微调整拍摄角度，让两侧脸部和眉眼区域更均衡。");
 
   const lowest = [...dims].sort((a, b) => a.score - b.score)[0];
   if (lowest.score < 0.55) {
@@ -151,11 +175,11 @@ function buildTips(
   }
 
   if (score < 6.0) {
-    tips.push("日常自拍中自然、自信的神态往往比过度修饰更重要。");
+    tips.push("日常自拍中自然、放松的状态往往比过度修饰更耐看。");
   }
 
   if (tips.length === 0) {
-    tips.push("保持当前素颜状态与拍摄方式即可，真实感是最好的加分项。");
+    tips.push("保持当前自然状态与拍摄方式即可，真实感是重要加分项。");
   }
 
   return tips.slice(0, 4);

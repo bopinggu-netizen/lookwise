@@ -11,8 +11,8 @@ export function AppHeader() {
             <IconSparkles className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-sm font-semibold sm:text-base">FaceAesthetic AI</p>
-            <p className="label-mono text-[var(--muted)]">v2.0 · Local Engine</p>
+            <p className="text-sm font-semibold sm:text-base">LookWise</p>
+            <p className="label-mono text-[var(--muted)]">Asian Aesthetic Reference</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5 rounded-full border border-[var(--success)]/30 bg-[var(--success)]/10 px-2.5 py-1 text-[10px] font-medium text-[var(--success)] sm:text-xs">
@@ -22,11 +22,11 @@ export function AppHeader() {
       </div>
 
       <h1 className="text-2xl font-bold leading-tight tracking-tight sm:text-4xl">
-        <span className="text-gradient">素颜颜值</span>
-        <span className="text-[var(--text)]"> AI 参考评分</span>
+        <span className="text-gradient">真实自拍</span>
+        <span className="text-[var(--text)]"> 审美参考评分</span>
       </h1>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-[var(--muted)] sm:text-base">
-        上传正脸素颜照，经 8 维质量门控与审美模型分析，输出 4.0–7.0 参考指数（普通人区间）。
+        面向普通人真实自拍场景，参考亚洲常见审美偏好中的倾向，输出 4.0–7.0 娱乐参考指数。
       </p>
 
       <div className="mt-5 flex flex-wrap gap-2">
