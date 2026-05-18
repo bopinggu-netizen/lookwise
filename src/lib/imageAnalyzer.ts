@@ -217,15 +217,15 @@ function runChecks(
 ): QualityCheck[] {
   const checks: QualityCheck[] = [];
 
-  // 原相机自拍通常清晰度足够；仅极模糊才拒绝
+  // mock 阶段对原相机自拍保持宽松：清晰度不足只提醒，不阻止评分
   checks.push({
     id: "blur",
     label: "清晰度",
     description: "检测照片是否模糊",
-    status: metrics.lapVar < 18 ? "fail" : metrics.lapVar < 45 ? "warn" : "pass",
+    status: metrics.lapVar < 45 ? "warn" : "pass",
     detail:
       metrics.lapVar < 18
-        ? "画面严重模糊，无法准确评估五官细节"
+        ? "画面清晰度较低，评分仅供参考"
         : metrics.lapVar < 45
           ? "清晰度略低，原相机可接受，建议对焦更清晰"
           : "清晰度良好（含原相机锐化）",
@@ -235,11 +235,10 @@ function runChecks(
     id: "light",
     label: "光线",
     description: "检测曝光与亮度",
-    status:
-      metrics.avgLum < 38 ? "fail" : metrics.avgLum < 58 || metrics.avgLum > 238 ? "warn" : "pass",
+    status: metrics.avgLum < 58 || metrics.avgLum > 238 ? "warn" : "pass",
     detail:
       metrics.avgLum < 38
-        ? "光线过暗，面部细节难以辨认"
+        ? "光线偏暗，评分仅供参考"
         : metrics.avgLum > 238
           ? "曝光偏高，原相机 HDR 可能略过曝"
           : metrics.avgLum < 58
@@ -247,15 +246,15 @@ function runChecks(
             : "光线条件可接受（含自动曝光）",
   });
 
-  // 仅当磨皮极高且皮肤纹理几乎消失时才判定美颜；HDR/锐化/白平衡不算
+  // 原相机前置自拍可能自带 HDR、锐化、白平衡和轻微平滑，mock 阶段不阻止评分
   const extremeBeauty = metrics.smoothness > 0.97 && metrics.lapVar < 28;
   checks.push({
     id: "beauty",
     label: "美颜检测",
     description: "检测明显磨皮、瘦脸等美颜处理",
-    status: extremeBeauty ? "fail" : metrics.smoothness > 0.93 && metrics.lapVar < 45 ? "warn" : "pass",
+    status: extremeBeauty || (metrics.smoothness > 0.93 && metrics.lapVar < 45) ? "warn" : "pass",
     detail: extremeBeauty
-      ? "检测到明显磨皮或五官液化痕迹，请使用原相机无美颜模式"
+      ? "皮肤纹理较平滑，可能受相机处理影响，评分仅供参考"
       : metrics.smoothness > 0.93 && metrics.lapVar < 45
         ? "皮肤略平滑，可能含轻度优化，原相机自动处理已忽略"
         : "未检测到明显美颜（原相机 HDR/锐化/白平衡视为正常）",
@@ -273,31 +272,31 @@ function runChecks(
         : "色彩自然（原相机成像）",
   });
 
-  // 自然唇色、泛红、毛孔痘印不判浓妆；仅高饱和彩妆才 fail
+  // 自然唇色、泛红、毛孔痘印不判浓妆；mock 阶段妆容不阻止评分
   checks.push({
     id: "makeup",
     label: "妆容检测",
     description: "检测明显浓妆",
-    status: metrics.heavyMakeup > 0.42 ? "fail" : metrics.heavyMakeup > 0.28 ? "warn" : "pass",
+    status: metrics.heavyMakeup > 0.42 ? "warn" : "pass",
     detail:
       metrics.heavyMakeup > 0.42
-        ? "检测到明显口红/眼妆/修容，请上传素颜照"
+        ? "可能存在较明显妆容，评分仅供参考"
         : metrics.heavyMakeup > 0.28
-          ? "略有妆容痕迹，自然唇色与泛红已忽略"
+          ? "自然唇色与轻微泛红已忽略，不影响评分"
           : "素颜特征正常（自然唇色、瑕疵、毛孔保留）",
   });
 
-  // 仅核心五官遮挡才 fail；发梢贴脸仅 warn
+  // 普通眼镜不算遮挡；仅疑似墨镜、强反光、口罩等核心遮挡时提醒
   checks.push({
     id: "occlusion",
     label: "遮挡检测",
     description: "检测眼鼻嘴等核心区域遮挡",
-    status: metrics.occlusion > 0.46 ? "fail" : metrics.occlusion > 0.24 ? "warn" : "pass",
+    status: metrics.occlusion > 0.3 ? "warn" : "pass",
     detail:
       metrics.occlusion > 0.46
-        ? "眼/鼻/嘴等核心五官存在严重遮挡"
-        : metrics.occlusion > 0.24
-          ? "核心区域轻微遮挡，发梢贴脸可接受"
+        ? "疑似墨镜、强反光或口罩遮挡核心五官，评分仅供参考"
+        : metrics.occlusion > 0.3
+          ? "核心区域可能有轻微遮挡，普通眼镜与发梢贴脸可接受"
           : "核心五官无严重遮挡",
   });
 
@@ -315,18 +314,16 @@ function runChecks(
     label: "正脸识别",
     description: "检测是否为正面人脸",
     status:
-      metrics.skinRatio < 0.12 || metrics.symmetry < 0.42
+      metrics.skinRatio < 0.06
         ? "fail"
-        : metrics.skinRatio < 0.22 || metrics.symmetry < 0.55
+        : metrics.skinRatio < 0.16 || metrics.symmetry < 0.48
           ? "warn"
           : "pass",
     detail:
-      metrics.skinRatio < 0.12
-        ? "未检测到足够的人脸区域，请上传正脸特写"
-        : metrics.symmetry < 0.42
-          ? "侧脸角度过大，核心五官不适合当前评分"
-          : metrics.skinRatio < 0.22 || metrics.symmetry < 0.55
-            ? "正脸角度或人脸占比略有偏差，但仍可继续评分"
+      metrics.skinRatio < 0.06
+        ? "未检测到可用于评分的人脸区域"
+        : metrics.skinRatio < 0.16 || metrics.symmetry < 0.48
+          ? "自拍角度略有偏差，评分仅供参考"
           : "正脸区域识别正常",
   });
 
