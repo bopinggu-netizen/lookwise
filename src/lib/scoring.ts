@@ -19,6 +19,8 @@ interface ScoreOutput {
 const SCORE_MIN = 4.0;
 const SCORE_MAX = 7.0;
 const ADVANTAGE_THRESHOLD = 0.68;
+const MILD_ADVANTAGE_THRESHOLD = 0.58;
+const WEAK_DIMENSION_THRESHOLD = 0.46;
 
 /** 将原始指标映射到 0–1 */
 function normalizeMetrics(m: Metrics) {
@@ -36,10 +38,10 @@ function normalizeMetrics(m: Metrics) {
 /** 4.0–7.0 档位标签 */
 export function getScoreTier(score: number): string {
   if (score >= 6.7) return "普通人顶美 / 顶帅";
-  if (score >= 6.3) return "普通人高颜值";
-  if (score >= 5.8) return "明显好看";
-  if (score >= 5.0) return "小美 / 小帅";
-  if (score >= 4.5) return "普通偏上";
+  if (score >= 6.2) return "普通人高颜值";
+  if (score >= 5.7) return "明显好看";
+  if (score >= 5.3) return "小美 / 小帅";
+  if (score >= 4.9) return "普通偏上";
   return "普通";
 }
 
@@ -107,22 +109,27 @@ export function computeBeautyScore(
     dimensions[5].score * 0.1;
 
   const advantageCount = dimensions.filter((d) => d.score >= ADVANTAGE_THRESHOLD).length;
+  const mildAdvantageCount = dimensions.filter((d) => d.score >= MILD_ADVANTAGE_THRESHOLD).length;
+  const weakDimensionCount = dimensions.filter((d) => d.score < WEAK_DIMENSION_THRESHOLD).length;
   const strongCoreCount = dimensions
     .slice(0, 4)
     .filter((d) => d.score >= ADVANTAGE_THRESHOLD).length;
+  const weightedAverage = weighted * 100;
 
-  let raw = SCORE_MIN + clamp((weighted - 0.5) / 0.34, 0, 1) * 3;
+  let raw = SCORE_MIN + clamp((weighted - 0.42) / 0.42, 0, 1) * 3;
   raw += (random() - 0.5) * 0.12;
 
-  raw = Math.min(raw, scoreCapForAdvantages(advantageCount));
-  if (strongCoreCount < 2) raw = Math.min(raw, 4.8);
-  if (strongCoreCount < 3) raw = Math.min(raw, 5.3);
-  if (strongCoreCount < 4) raw = Math.min(raw, 5.7);
+  raw = Math.min(raw, scoreCapForAdvantages(advantageCount, mildAdvantageCount, weakDimensionCount, weightedAverage));
+  if (strongCoreCount < 1) raw = Math.min(raw, 5.0);
+  if (strongCoreCount < 2) raw = Math.min(raw, 5.3);
+  if (strongCoreCount < 3) raw = Math.min(raw, 5.6);
+
+  raw = Math.max(raw, scoreFloorForOrdinarySpread(weightedAverage, mildAdvantageCount, weakDimensionCount));
 
   const score = Math.round(Math.min(SCORE_MAX, Math.max(SCORE_MIN, raw)) * 10) / 10;
 
   const tier = getScoreTier(score);
-  const summary = buildSummary(score, tier, advantageCount);
+  const summary = buildSummary(score, tier);
   const tips = buildTips(score, n, dimensions, advantageCount);
 
   return {
@@ -137,29 +144,29 @@ export function computeBeautyScore(
   };
 }
 
-function buildSummary(score: number, tier: string, advantageCount: number): string {
+function buildSummary(score: number, tier: string): string {
   if (score >= 6.7) {
     return `综合参考结果为「${tier}」。7.0 已经是普通人真实自拍区间内的极高参考分，不代表与明星、网红或精修图对标。`;
   }
-  if (score >= 6.3) {
+  if (score >= 6.2) {
     return `综合参考结果为「${tier}」。整体观感突出，属于普通人真实自拍场景中较高的参考区间。`;
   }
-  if (score >= 5.8) {
+  if (score >= 5.7) {
     return `综合参考结果为「${tier}」。整体协调度、眉眼、脸型和干净感都较强，第一眼好感比较明显。`;
   }
-  if (score >= 5.4) {
-    return `综合参考结果为「${tier}」。整体好感较明显，属于稳定的小美 / 小帅区间。`;
+  if (score >= 5.3) {
+    return `综合参考结果为「${tier}」。具备较明确的局部优势，进入小美 / 小帅低段。`;
   }
-  if (score >= 5.0) {
-    return `综合参考结果为「${tier}」。具备一定局部优势，属于小美 / 小帅低段，但整体仍偏日常自然。`;
+  if (score >= 4.9) {
+    return `综合参考结果为「${tier}」。有一定局部优势，属于普通偏上参考。`;
   }
-  if (score >= 4.5) {
-    return `综合参考结果为「${tier}」。整体略高于普通，有部分自然优势，但还没有达到明显好看区间。`;
+  if (score >= 4.6) {
+    return `综合参考结果为「${tier}」。整体仍属于普通区间，但有一些自然优势。`;
   }
-  if (advantageCount === 0) {
-    return `综合参考结果为「${tier}」。整体属于普通区间，当前照片没有体现出明显上镜优势。`;
+  if (score >= 4.3) {
+    return `综合参考结果为「${tier}」。整体属于普通区间，五官基础较日常自然。`;
   }
-  return `综合参考结果为「${tier}」。整体属于普通区间，当前照片体现出的局部优势还不明显。`;
+  return `综合参考结果为「${tier}」。整体处于普通区间下沿，当前照片没有体现出明显上镜优势。`;
 }
 
 function buildTips(
@@ -199,10 +206,37 @@ function proportionFromSkin(skinRatio: number): number {
   return clamp(1 - Math.abs(skinRatio - 0.36) / 0.34, 0.28, 0.82);
 }
 
-function scoreCapForAdvantages(advantageCount: number): number {
-  if (advantageCount <= 0) return 4.4;
-  if (advantageCount === 1) return 4.8;
+function scoreCapForAdvantages(
+  advantageCount: number,
+  mildAdvantageCount: number,
+  weakDimensionCount: number,
+  weightedAverage: number
+): number {
+  if (advantageCount <= 0) {
+    if (mildAdvantageCount >= 3 && weakDimensionCount <= 1 && weightedAverage >= 58) return 4.8;
+    if (mildAdvantageCount >= 2 && weakDimensionCount <= 1 && weightedAverage >= 52) return 4.6;
+    return 4.4;
+  }
+  if (advantageCount === 1) {
+    return mildAdvantageCount >= 3 && weakDimensionCount <= 1 ? 5.0 : 4.8;
+  }
   if (advantageCount === 2) return 5.3;
-  if (advantageCount === 3) return 5.7;
+  if (advantageCount === 3) return 5.6;
   return SCORE_MAX;
+}
+
+function scoreFloorForOrdinarySpread(
+  weightedAverage: number,
+  mildAdvantageCount: number,
+  weakDimensionCount: number
+): number {
+  let floor = SCORE_MIN;
+  if (weightedAverage >= 45) floor = 4.2;
+  if (weightedAverage >= 52) floor = 4.4;
+  if (weightedAverage >= 58) floor = 4.6;
+  if (mildAdvantageCount >= 2 && weakDimensionCount <= 1) floor = Math.max(floor, 4.4);
+  if (mildAdvantageCount >= 3 && weightedAverage >= 56 && weakDimensionCount <= 1) {
+    floor = Math.max(floor, 4.6);
+  }
+  return floor;
 }
