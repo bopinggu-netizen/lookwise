@@ -5,6 +5,7 @@ import type { AnalysisPhase } from "@/types";
 const pipeline = [
   { id: "upload", label: "上传", phases: ["idle"] as AnalysisPhase[] },
   { id: "scan", label: "检测", phases: ["loading", "checking"] as AnalysisPhase[] },
+  { id: "checked", label: "完成", phases: ["checked"] as AnalysisPhase[] },
   { id: "score", label: "评分", phases: ["scoring"] as AnalysisPhase[] },
   { id: "report", label: "报告", phases: ["done", "rejected"] as AnalysisPhase[] },
 ];

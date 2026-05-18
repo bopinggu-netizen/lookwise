@@ -53,20 +53,26 @@ export default function HomePage() {
         return;
       }
 
-      setPhase("scoring");
-      await delay(800);
-      setPhase("done");
       setResult(analysis);
+      setPhase("checked");
     } catch (e) {
       alert(e instanceof Error ? e.message : "分析失败，请重试");
       setPhase("idle");
     }
   }, [selectedFile]);
 
+  const handleContinueScoring = useCallback(async () => {
+    if (!result?.passed || phase !== "checked") return;
+
+    setPhase("scoring");
+    await delay(800);
+    setPhase("done");
+  }, [phase, result]);
+
   const isAnalyzing = ["loading", "checking", "scoring"].includes(phase);
   const showScore = result?.passed && phase === "done";
   const showRejected = phase === "rejected" && result;
-  const showPassedChecks = phase === "done" && result;
+  const showPassedChecks = ["checked", "done"].includes(phase) && result;
 
   return (
     <div className="app-shell safe-bottom">
@@ -136,21 +142,59 @@ export default function HomePage() {
                 <div className="glass-panel rounded-2xl p-4 sm:p-5">
                   <h2 className="mb-4 text-sm font-semibold sm:text-base">检测报告</h2>
                   <CheckList checks={result.checks} />
-                  <ReuploadButton onClick={resetUpload} className="mt-4" />
+                  <ReuploadButton
+                    onClick={resetUpload}
+                    className="mt-4"
+                    label="换一张照片重新检测"
+                  />
                 </div>
               </div>
             )}
 
             {showPassedChecks && result && (
               <div className="animate-slide-up space-y-4">
-                {showScore ? (
-                  <div className="glass-panel rounded-2xl p-4 sm:p-6">
-                    <ScoreDisplay result={result} />
-                    <ReuploadButton onClick={resetUpload} className="mt-6" />
+                {phase === "checked" ? (
+                  <div className="glass-panel rounded-2xl p-4 sm:p-5">
+                    <div className="mb-4 flex items-center gap-2">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--success)]/15 text-[var(--success)]">
+                        ✓
+                      </span>
+                      <div>
+                        <p className="font-semibold text-[var(--success)]">质量检测通过</p>
+                        <p className="text-sm text-[var(--muted)]">
+                          未发现阻止评分的问题，轻微提醒项不会影响继续查看。
+                        </p>
+                      </div>
+                    </div>
+                    <CheckList checks={result.checks} compact />
+                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                      <ReuploadButton
+                        onClick={resetUpload}
+                        label="重新上传其他照片"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleContinueScoring}
+                        className="w-full rounded-xl border border-transparent bg-gradient-to-r from-[var(--accent)] to-[var(--accent-2)] px-4 py-3 text-sm font-medium text-[var(--bg)] transition-opacity hover:opacity-90 active:opacity-85"
+                      >
+                        继续查看评分
+                      </button>
+                    </div>
                   </div>
                 ) : null}
 
-                <details className="glass-panel group rounded-2xl p-4 sm:p-5" open>
+                {showScore ? (
+                  <div className="glass-panel rounded-2xl p-4 sm:p-6">
+                    <ScoreDisplay result={result} />
+                    <ReuploadButton
+                      onClick={resetUpload}
+                      className="mt-6"
+                      label="重新上传其他照片"
+                    />
+                  </div>
+                ) : null}
+
+                <details className="glass-panel group rounded-2xl p-4 sm:p-5" open={phase === "done"}>
                   <summary className="cursor-pointer list-none text-sm font-semibold sm:text-base [&::-webkit-details-marker]:hidden">
                     <span className="flex items-center justify-between">
                       质量检测明细

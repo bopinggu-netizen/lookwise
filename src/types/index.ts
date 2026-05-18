@@ -29,6 +29,7 @@ export type AnalysisPhase =
   | "idle"
   | "loading"
   | "checking"
+  | "checked"
   | "scoring"
   | "done"
   | "rejected";
