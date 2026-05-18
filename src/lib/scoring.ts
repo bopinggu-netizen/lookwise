@@ -54,22 +54,22 @@ export function computeBeautyScore(
     {
       name: "五官协调",
       score: clamp(n.harmony + (random() - 0.5) * 0.08, 0.35, 0.88),
-      comment: n.symmetry > 0.75 ? "左右对称度较好，整体比例和谐" : "五官比例尚可，侧脸角度可能略有影响",
+      comment: n.symmetry > 0.75 ? "左右对称度较好，整体比例自然" : "五官比例尚可，轻微角度变化会影响当前照片观感",
     },
     {
       name: "肤质气色",
       score: clamp(n.complexion + (random() - 0.5) * 0.06, 0.35, 0.85),
-      comment: n.naturalSkin > 0.5 ? "肤色自然，气色较为通透" : "肤质纹理可见，真实感较好",
+      comment: n.naturalSkin > 0.5 ? "肤色自然，气色较为干净通透" : "肤质纹理保留，真实感较好",
     },
     {
       name: "轮廓线条",
       score: clamp(n.proportion * 0.85 + n.symmetry * 0.15 + (random() - 0.5) * 0.07, 0.38, 0.86),
-      comment: "脸型线条自然，符合日常自拍中的真实观感",
+      comment: "脸型线条自然，参考亚洲常见审美偏好中的清爽轮廓倾向",
     },
     {
       name: "神采亲和力",
       score: clamp(n.lighting * 0.6 + n.clarity * 0.4 + (random() - 0.5) * 0.08, 0.4, 0.88),
-      comment: n.lighting > 0.65 ? "光线衬托眼神与表情，更具亲和力" : "建议适当提亮环境光以展现神采",
+      comment: n.lighting > 0.65 ? "光线衬托眉眼与表情，更有自然亲和感" : "建议适当提亮环境光以展现眉眼神采",
     },
   ];
 
@@ -114,19 +114,19 @@ export function computeBeautyScore(
 
 function buildSummary(score: number, tier: string): string {
   if (score >= 7.0) {
-    return `综合参考结果为「${tier}」。在普通人真实自拍场景中，已是极高水平，但不与明星、网红或精修图对比。`;
+    return `综合参考结果为「${tier}」。在普通人真实自拍场景中属于极高参考区间，仍仅代表这张照片的自然观感。`;
   }
   if (score >= 6.5) {
-    return `综合参考结果为「${tier}」。整体观感突出，在日常生活场景中属于非常好看的类型。`;
+    return `综合参考结果为「${tier}」。整体观感突出，在日常生活场景中属于很有吸引力的类型。`;
   }
   if (score >= 6.0) {
-    return `综合参考结果为「${tier}」。在班级或校园场景中辨识度较高，若干维度表现亮眼。`;
+    return `综合参考结果为「${tier}」。在常见生活场景中辨识度较高，若干维度表现亮眼。`;
   }
   if (score >= 5.5) {
     return `综合参考结果为「${tier}」。第一眼好感度较好，真实素颜状态有加分。`;
   }
   if (score >= 5.0) {
-    return `综合参考结果为「${tier}」。具备一定吸引力，符合日常审美中的清秀耐看类型。`;
+    return `综合参考结果为「${tier}」。具备一定吸引力，符合日常审美中清秀、干净、耐看的倾向。`;
   }
   if (score >= 4.5) {
     return `综合参考结果为「${tier}」。整体处于普通人常见区间，真实自然的状态本身就是加分项。`;

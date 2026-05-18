@@ -248,15 +248,15 @@ function runChecks(
   });
 
   // 仅当磨皮极高且皮肤纹理几乎消失时才判定美颜；HDR/锐化/白平衡不算
-  const extremeBeauty = metrics.smoothness > 0.94 && metrics.lapVar < 35;
+  const extremeBeauty = metrics.smoothness > 0.97 && metrics.lapVar < 28;
   checks.push({
     id: "beauty",
     label: "美颜检测",
     description: "检测明显磨皮、瘦脸等美颜处理",
-    status: extremeBeauty ? "fail" : metrics.smoothness > 0.9 && metrics.lapVar < 55 ? "warn" : "pass",
+    status: extremeBeauty ? "fail" : metrics.smoothness > 0.93 && metrics.lapVar < 45 ? "warn" : "pass",
     detail: extremeBeauty
       ? "检测到明显磨皮或五官液化痕迹，请使用原相机无美颜模式"
-      : metrics.smoothness > 0.9 && metrics.lapVar < 55
+      : metrics.smoothness > 0.93 && metrics.lapVar < 45
         ? "皮肤略平滑，可能含轻度优化，原相机自动处理已忽略"
         : "未检测到明显美颜（原相机 HDR/锐化/白平衡视为正常）",
   });
@@ -292,11 +292,11 @@ function runChecks(
     id: "occlusion",
     label: "遮挡检测",
     description: "检测眼鼻嘴等核心区域遮挡",
-    status: metrics.occlusion > 0.38 ? "fail" : metrics.occlusion > 0.22 ? "warn" : "pass",
+    status: metrics.occlusion > 0.46 ? "fail" : metrics.occlusion > 0.24 ? "warn" : "pass",
     detail:
-      metrics.occlusion > 0.38
-        ? "眼/鼻/嘴等核心五官存在明显遮挡"
-        : metrics.occlusion > 0.22
+      metrics.occlusion > 0.46
+        ? "眼/鼻/嘴等核心五官存在严重遮挡"
+        : metrics.occlusion > 0.24
           ? "核心区域轻微遮挡，发梢贴脸可接受"
           : "核心五官无严重遮挡",
   });
@@ -314,12 +314,19 @@ function runChecks(
     id: "face",
     label: "正脸识别",
     description: "检测是否为正面人脸",
-    status: metrics.skinRatio < 0.16 ? "fail" : metrics.skinRatio < 0.24 ? "warn" : "pass",
+    status:
+      metrics.skinRatio < 0.12 || metrics.symmetry < 0.42
+        ? "fail"
+        : metrics.skinRatio < 0.22 || metrics.symmetry < 0.55
+          ? "warn"
+          : "pass",
     detail:
-      metrics.skinRatio < 0.16
+      metrics.skinRatio < 0.12
         ? "未检测到足够的人脸区域，请上传正脸特写"
-        : metrics.skinRatio < 0.24
-          ? "人脸区域偏小，建议靠近镜头"
+        : metrics.symmetry < 0.42
+          ? "侧脸角度过大，核心五官不适合当前评分"
+          : metrics.skinRatio < 0.22 || metrics.symmetry < 0.55
+            ? "正脸角度或人脸占比略有偏差，但仍可继续评分"
           : "正脸区域识别正常",
   });
 

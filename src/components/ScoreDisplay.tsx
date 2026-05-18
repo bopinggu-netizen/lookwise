@@ -107,11 +107,23 @@ export function ScoreDisplay({ result }: ScoreDisplayProps) {
         </div>
       )}
 
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-solid)]/45 p-5 sm:p-6">
+        <h3 className="mb-3 font-medium">审美视角参考</h3>
+        <div className="space-y-3 text-sm leading-relaxed text-[var(--muted)]">
+          <p>
+            女性照片 + 男性审美：参考亚洲常见审美偏好中的倾向，干净感、眼部吸引力、脸部柔和度、白净感、纤细感、自然甜美感等通常更容易形成好感。
+          </p>
+          <p>
+            男性照片 + 女性审美：参考亚洲常见审美偏好中的倾向，清爽干净感、皮肤状态、下颌线、脸型轮廓、眉眼精神感、发型整洁度、自然阳光感等通常更容易形成好感。
+          </p>
+        </div>
+      </div>
+
       <p className="text-center text-xs leading-relaxed text-[var(--muted)]/60">
-        本评分仅针对普通人真实自拍场景，不与明星、网红、精修图或专业摄影作品对比。
+        本评分仅针对普通人真实自拍场景，不与网红、精修图或专业摄影作品对比。
       </p>
       <p className="mt-1 text-center text-xs text-[var(--muted)]/50">
-        7.0 已经是普通人区间的极高参考分，不代表明星级颜值。评分仅供娱乐与自我参考。
+        7.0 是普通人区间的极高参考分。评分仅供娱乐与自我参考，不代表绝对结论。
       </p>
     </div>
   );
